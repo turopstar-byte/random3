@@ -8,28 +8,30 @@
     <style>
         :root {
             --ios-bg: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
-            --ios-card: rgba(255, 255, 255, 0.7);
+            --ios-card: rgba(255, 255, 255, 0.4);
             --ios-text: #000000;
             --ios-blue: #007aff;
             --ios-gray: #8e8e93;
-            --ios-input: rgba(118, 118, 128, 0.12);
+            --ios-input: rgba(0, 0, 0, 0.05);
             --ios-switcher: rgba(118, 118, 128, 0.12);
-            --ios-hover: rgba(0, 0, 0, 0.05);
+            --ios-hover: rgba(0, 0, 0, 0.1);
             --ios-red: #ff3b30;
             --ios-green: #34c759;
             --ios-gold: #ffcc00;
             --ios-silver: #adb5bd;
+            --ios-menu-bg: rgba(255, 255, 255, 0.7);
         }
 
         [data-theme="dark"] {
-            --ios-bg: #000000;
-            --ios-card: #1c1c1e;
+            --ios-bg: radial-gradient(circle at top right, #1c1c1e, #000000);
+            --ios-card: rgba(28, 28, 30, 0.6);
             --ios-text: #ffffff;
             --ios-blue: #0a84ff;
             --ios-gray: #98989d;
-            --ios-input: #2c2c2e;
+            --ios-input: rgba(255, 255, 255, 0.1);
             --ios-switcher: #3a3a3c;
-            --ios-hover: rgba(255, 255, 255, 0.1);
+            --ios-hover: rgba(255, 255, 255, 0.15);
+            --ios-menu-bg: rgba(44, 44, 46, 0.8);
         }
 
         body {
@@ -47,42 +49,48 @@
             transition: all 0.3s ease;
         }
 
-        /* Головний контейнер */
-        .container, .history-container {
+        .container, .history-container, .settings-container {
             width: 100%;
             max-width: 380px;
             background: var(--ios-card);
-            backdrop-filter: blur(25px);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
             padding: 24px;
             border-radius: 35px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
-            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
             box-sizing: border-box;
             position: relative;
         }
 
-        /* Інтегрована верхня панель */
+        /* Shared Header (Internal Top Bar) */
         .internal-top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 25px;
-            background: var(--ios-input);
-            padding: 8px 12px;
-            border-radius: 20px;
         }
 
-        #clock {
+        .top-pill {
+            background: var(--ios-input);
+            padding: 8px 14px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 34px;
+            box-sizing: border-box;
+        }
+
+        .clock-pill {
             font-weight: 600;
             font-size: 13px;
             color: var(--ios-text);
-            min-width: 65px;
+            min-width: 80px;
         }
 
-        .internal-actions {
-            display: flex;
-            gap: 8px;
-            align-items: center;
+        .actions-pill {
+            gap: 12px;
         }
 
         .icon-btn {
@@ -91,7 +99,7 @@
             color: var(--ios-blue);
             font-size: 16px;
             cursor: pointer;
-            padding: 4px;
+            padding: 0;
             display: flex;
             align-items: center;
         }
@@ -104,13 +112,83 @@
             font-weight: 600;
             cursor: pointer;
             outline: none;
+            padding: 0;
+        }
+
+        /* Screens management */
+        .screen { display: none; }
+        .screen.active { display: block; animation: screenFade 0.3s ease-out; }
+
+        @keyframes screenFade {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .app-title-container {
+            display: grid;
+            grid-template-columns: 40px 1fr 40px;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
         }
 
         .app-title {
-            display: flex; align-items: center; justify-content: center;
-            gap: 10px; font-size: 24px; font-weight: 700; margin-bottom: 20px;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 10px; 
+            font-size: 24px; 
+            font-weight: 700;
+            grid-column: 2;
         }
         .app-title i { color: var(--ios-blue); }
+
+        .menu-btn {
+            grid-column: 3;
+            background: var(--ios-input);
+            border: none;
+            color: var(--ios-blue);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 40px;
+            right: 0;
+            width: 180px;
+            background: var(--ios-menu-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 18px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.3);
+            animation: menuFade 0.2s ease-out;
+        }
+
+        .dropdown-menu.active { display: flex; }
+
+        .menu-item {
+            padding: 12px 16px;
+            font-size: 15px;
+            color: var(--ios-text);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .menu-item:active { background: var(--ios-hover); }
 
         .mode-switcher {
             display: flex; background: var(--ios-switcher);
@@ -178,7 +256,7 @@
         .input-section.active { display: block; }
         .input-group { background: var(--ios-input); border-radius: 14px; padding: 12px 16px; margin-bottom: 12px; position: relative; }
         label { font-size: 11px; font-weight: 600; color: var(--ios-gray); text-transform: uppercase; margin-bottom: 4px; display: block; }
-        input, textarea { width: 100%; background: transparent; border: none; font-size: 17px; color: var(--ios-text); outline: none; }
+        input, textarea, select { width: 100%; background: transparent; border: none; font-size: 17px; color: var(--ios-text); outline: none; -webkit-appearance: none; }
         textarea { height: 70px; resize: none; }
 
         .file-label {
@@ -224,9 +302,6 @@
             display: flex; justify-content: space-between; align-items: center;
         }
 
-        .history-container { display: none; opacity: 0; transform: scale(0.9); }
-        .history-container.active { display: block; opacity: 1; transform: scale(1); }
-
         .back-btn {
             background: transparent; border: none; color: var(--ios-blue);
             font-size: 16px; font-weight: 600; cursor: pointer;
@@ -236,33 +311,69 @@
         .clear-btn {
             width: 100%; padding: 12px; color: var(--ios-red);
             font-size: 14px; font-weight: 500; border: none;
-            background: transparent; cursor: pointer; display: none;
+            background: transparent; cursor: pointer;
+        }
+
+        /* Settings specific styles */
+        .settings-section-title {
+            font-size: 13px; color: var(--ios-gray); text-transform: uppercase;
+            margin: 20px 0 8px 16px; font-weight: 600;
+        }
+        .settings-row {
+            background: var(--ios-input); border-radius: 14px; padding: 12px 16px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;
+        }
+        .settings-info {
+            text-align: center; margin-top: 30px; font-size: 13px; color: var(--ios-gray);
         }
 
         .socials { display: flex; justify-content: center; gap: 30px; margin-top: 20px; }
         .socials a { color: var(--ios-blue); font-size: 1.5rem; }
 
         .rolling { visibility: hidden; }
+        
+        #toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: white; padding: 10px 20px;
+            border-radius: 20px; font-size: 14px; display: none; z-index: 1000;
+        }
     </style>
 </head>
 <body>
 
-    <div class="container" id="main-screen">
+    <!-- SHARED HEADER TEMPLATE -->
+    <template id="header-template">
         <div class="internal-top-bar">
-            <div id="clock">00:00:00</div>
-            <div class="internal-actions">
-                <button class="icon-btn" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
-                <select class="lang-minimal" onchange="setLang(this.value)">
+            <div class="top-pill clock-pill clock-display">00:00:00</div>
+            <div class="top-pill actions-pill">
+                <button class="icon-btn theme-toggle-btn" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+                <select class="lang-minimal lang-select" onchange="setLang(this.value)">
                     <option value="uk">UA</option>
                     <option value="en">EN</option>
                     <option value="ru">RU</option>
                 </select>
             </div>
         </div>
+    </template>
 
-        <div class="app-title">
-            <i class="fas fa-dice-five"></i>
-            <span id="t-app-name">Randomizer</span>
+    <!-- MAIN SCREEN -->
+    <div class="container screen active" id="main-screen">
+        <div id="header-main"></div> <!-- Header Target -->
+
+        <div class="app-title-container">
+            <div class="app-title">
+                <i class="fas fa-dice-five"></i>
+                <span id="t-app-name">Randomizer</span>
+            </div>
+            <button class="menu-btn" onclick="toggleMenu(event)">
+                <i class="fas fa-ellipsis-h"></i>
+            </button>
+            <div class="dropdown-menu" id="dropdown-menu">
+                <div class="menu-item" onclick="openSettings()">
+                    <span id="t-settings-menu">Налаштування</span>
+                    <i class="fas fa-cog"></i>
+                </div>
+            </div>
         </div>
 
         <div class="mode-switcher">
@@ -332,7 +443,7 @@
 
         <button class="btn-gen" onclick="generate()" id="t-btn">Generate</button>
 
-        <div class="history-trigger" onclick="toggleScreens(true)">
+        <div class="history-trigger" onclick="navigateTo('history-screen')">
             <span id="t-history" style="font-weight: 600;">History</span>
             <div id="t-view-all" style="margin-top:4px; opacity: 0.7; font-size: 11px;">Натисніть для перегляду</div>
         </div>
@@ -344,37 +455,137 @@
         </div>
     </div>
 
-    <div class="history-container" id="history-screen">
-        <button class="back-btn" onclick="toggleScreens(false)">
+    <!-- HISTORY SCREEN -->
+    <div class="history-container screen" id="history-screen">
+        <div id="header-history"></div> <!-- Header Target -->
+        <button class="back-btn" onclick="navigateTo('main-screen')">
             <i class="fas fa-chevron-left"></i> <span id="t-back">Назад</span>
         </button>
         <h2 id="t-hist-title" style="margin: 0 0 15px 0; text-align: center;">Історія</h2>
         <div class="history-list" id="full-log"></div>
-        <button class="clear-btn" id="t-clear" onclick="clearHistory()">Clear History</button>
+        <button class="clear-btn" id="t-clear" onclick="clearHistory()" style="display:none;">Clear History</button>
     </div>
+
+    <!-- SETTINGS SCREEN -->
+    <div class="settings-container screen" id="settings-screen">
+        <div id="header-settings"></div> <!-- Header Target -->
+        <button class="back-btn" onclick="navigateTo('main-screen')">
+            <i class="fas fa-chevron-left"></i> <span id="t-back-settings">Назад</span>
+        </button>
+        <h2 id="t-sett-title" style="margin: 0 0 15px 0; text-align: center;">Налаштування</h2>
+        
+        <div class="settings-section-title" id="t-gen-settings">Генерація</div>
+        <div class="settings-row">
+            <span id="t-delay">Затримка (сек)</span>
+            <select id="delay-select" style="width: auto; color: var(--ios-blue); font-weight: 600; cursor: pointer;">
+                <option value="0">0</option>
+                <option value="1000">1</option>
+                <option value="2000">2</option>
+                <option value="3000">3</option>
+            </select>
+        </div>
+
+        <div class="settings-section-title" id="t-data-settings">Дані та Експорт</div>
+        <div class="settings-row" onclick="exportHistoryTxt()" style="cursor: pointer;">
+            <span id="t-export-txt">Експорт у .TXT</span>
+            <i class="fas fa-file-alt" style="color: var(--ios-blue);"></i>
+        </div>
+
+        <div class="settings-section-title" id="t-about-settings">Про додаток</div>
+        <div class="settings-row">
+            <span id="t-version">Версія</span>
+            <span style="color: var(--ios-gray);">2.1.0 Pro</span>
+        </div>
+        <div class="settings-row" onclick="window.open('#')" style="cursor: pointer;">
+            <span id="t-support">Підтримка</span>
+            <i class="fas fa-external-link-alt" style="color: var(--ios-blue); font-size: 12px;"></i>
+        </div>
+
+        <div class="settings-info">
+            <p>Created with <i class="fas fa-heart" style="color:var(--ios-red)"></i> for Random Lovers</p>
+            <p id="t-author">© 2024 Randomizer Pro Team</p>
+        </div>
+    </div>
+
+    <div id="toast">Повідомлення</div>
 
 <script>
     let currentMode = 'numbers';
     let currentLang = 'uk';
+    let currentTheme = 'light';
     let coinRotation = 0;
+    let historyData = [];
 
-    function updateClock() {
-        const now = new Date();
-        document.getElementById('clock').innerText = now.toLocaleTimeString('uk-UA');
+    // --- Core UI Management ---
+
+    function initHeaders() {
+        const template = document.getElementById('header-template');
+        const targets = ['header-main', 'header-history', 'header-settings'];
+        
+        targets.forEach(targetId => {
+            const container = document.getElementById(targetId);
+            const clone = template.content.cloneNode(true);
+            container.appendChild(clone);
+        });
+        updateHeaderStates();
     }
-    setInterval(updateClock, 1000);
-    updateClock();
+
+    function updateHeaderStates() {
+        // Sync clocks
+        const clocks = document.querySelectorAll('.clock-display');
+        const now = new Date().toLocaleTimeString('uk-UA');
+        clocks.forEach(c => c.innerText = now);
+
+        // Sync theme icons
+        const themeIcons = document.querySelectorAll('.theme-toggle-btn i');
+        themeIcons.forEach(i => i.className = currentTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon');
+
+        // Sync lang selects
+        const langSelects = document.querySelectorAll('.lang-select');
+        langSelects.forEach(s => s.value = currentLang);
+    }
+
+    setInterval(() => {
+        const now = new Date().toLocaleTimeString('uk-UA');
+        document.querySelectorAll('.clock-display').forEach(c => c.innerText = now);
+    }, 1000);
+
+    function navigateTo(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        if (screenId === 'main-screen') {
+            const menu = document.getElementById('dropdown-menu');
+            menu.classList.remove('active');
+        }
+    }
+
+    function toggleMenu(event) {
+        event.stopPropagation();
+        const menu = document.getElementById('dropdown-menu');
+        menu.classList.toggle('active');
+    }
+
+    window.addEventListener('click', () => {
+        const menu = document.getElementById('dropdown-menu');
+        if (menu && menu.classList.contains('active')) {
+            menu.classList.remove('active');
+        }
+    });
+
+    function openSettings() {
+        navigateTo('settings-screen');
+    }
 
     function toggleTheme() {
         const body = document.body;
-        const icon = document.querySelector('.icon-btn i');
         if (body.getAttribute('data-theme') === 'dark') {
             body.removeAttribute('data-theme');
-            icon.className = 'fas fa-moon';
+            currentTheme = 'light';
         } else {
             body.setAttribute('data-theme', 'dark');
-            icon.className = 'fas fa-sun';
+            currentTheme = 'dark';
         }
+        updateHeaderStates();
     }
 
     function switchMode(mode) {
@@ -408,42 +619,20 @@
         reader.readAsText(file);
     }
 
-    async function shareResult() {
-        let val = document.getElementById('output').innerText;
-        if (currentMode === 'coin') val = document.getElementById('t-coin-hint').innerText;
-        if (!val || val === "0" || val === "...") return;
-        
-        const shareData = {
-            title: 'Randomizer Pro',
-            text: `Мій результат: ${val} \nЗгенеровано в Randomizer Pro!`,
-            url: window.location.href
-        };
-
-        try {
-            if (navigator.share) {
-                await navigator.share(shareData);
-            } else {
-                navigator.clipboard.writeText(shareData.text);
-            }
-        } catch (err) { console.log(err); }
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 2000);
     }
 
-    function toggleScreens(showHistory) {
-        const main = document.getElementById('main-screen');
-        const hist = document.getElementById('history-screen');
-        if (showHistory) {
-            main.style.display = 'none';
-            hist.classList.add('active');
-        } else {
-            hist.classList.remove('active');
-            main.style.display = 'block';
-        }
-    }
+    // --- Generation Logic ---
 
     function generate() {
         const out = document.getElementById('output');
         const dice = document.getElementById('dice-anim');
         const coinObj = document.getElementById('coin-obj');
+        const delay = parseInt(document.getElementById('delay-select').value) || 0;
 
         if (currentMode === 'coin') {
             const isHeads = Math.random() < 0.5;
@@ -509,12 +698,18 @@
 
             out.innerText = resText;
             if(resText !== "..." && !resText.includes("діапазон")) addToLog(resText);
-        }, 600);
+        }, 600 + delay);
     }
+
+    // --- History & Export ---
 
     function addToLog(val) {
         const log = document.getElementById('full-log');
-        const time = new Date().toLocaleTimeString('uk-UA', {hour: '2-digit', minute:'2-digit'});
+        const now = new Date();
+        const time = now.toLocaleTimeString('uk-UA', {hour: '2-digit', minute:'2-digit'});
+        
+        historyData.push({ value: val, time: time, date: now.toLocaleDateString() });
+
         const item = document.createElement('div');
         item.className = 'history-item';
         item.innerHTML = `<span style="font-weight:600; font-size:16px;">${val}</span><span style="font-size:11px; color:var(--ios-gray);">${time}</span>`;
@@ -525,6 +720,30 @@
     function clearHistory() {
         document.getElementById('full-log').innerHTML = '';
         document.getElementById('t-clear').style.display = 'none';
+        historyData = [];
+        showToast(currentLang === 'uk' ? "Історію очищено" : "History cleared");
+    }
+
+    function exportHistoryTxt() {
+        if (historyData.length === 0) {
+            showToast(currentLang === 'uk' ? "Історія порожня" : "History is empty");
+            return;
+        }
+        let content = "Randomizer Pro - History Export\n";
+        content += "==============================\n\n";
+        historyData.forEach((item, i) => {
+            content += `[${item.date} ${item.time}] Result: ${item.value}\n`;
+        });
+        
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `history_${new Date().getTime()}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
     function copyResult() {
@@ -536,10 +755,60 @@
         setTimeout(() => icon.className = 'far fa-copy', 1500);
     }
 
+    async function shareResult() {
+        let val = document.getElementById('output').innerText;
+        if (currentMode === 'coin') val = document.getElementById('t-coin-hint').innerText;
+        if (!val || val === "0" || val === "...") return;
+        
+        const shareData = {
+            title: 'Randomizer Pro',
+            text: `Мій результат: ${val} \nЗгенеровано в Randomizer Pro!`,
+            url: window.location.href
+        };
+
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+            } else {
+                navigator.clipboard.writeText(shareData.text);
+                showToast(currentLang === 'uk' ? "Скопійовано для поширення" : "Copied to share");
+            }
+        } catch (err) { console.log(err); }
+    }
+
+    // --- Localization ---
+
     const i18n = {
-        uk: { min:"Мін", max:"Макс", count:"Кількість", names:"Список імен", nMode:"Числа", nameMode:"Імена", coinMode:"Монета", btn:"Згенерувати", history:"Історія", back:"Назад", hTitle:"Історія", view:"Натисніть для перегляду", clear: "Очистити історію", noRepeat: "Без повторів", coinHint: "Натисніть кнопку, щоб підкинути монету" },
-        en: { min:"Min", max:"Max", count:"Quantity", names:"Name List", nMode:"Numbers", nameMode:"Names", coinMode:"Coin", btn:"Generate", history:"History", back:"Back", hTitle:"History", view:"Click to view", clear: "Clear History", noRepeat: "No repeats", coinHint: "Tap generate to flip the coin" },
-        ru: { min:"Мин", max:"Макс", count:"Кол-во", names:"Список имен", nMode:"Числа", nameMode:"Имена", coinMode:"Монета", btn:"Сгенерировать", history:"История", back:"Назад", hTitle:"История", view:"Нажмите для просмотра", clear: "Очистить историю", noRepeat: "Без повторов", coinHint: "Нажмите кнопку, чтобы подбросить монету" }
+        uk: { 
+            min:"Мін", max:"Макс", count:"Кількість", names:"Список імен", 
+            nMode:"Числа", nameMode:"Імена", coinMode:"Монета", btn:"Згенерувати", 
+            history:"Історія", back:"Назад", hTitle:"Історія", view:"Натисніть для перегляду", 
+            clear: "Очистити історію", noRepeat: "Без повторів", 
+            coinHint: "Натисніть кнопку, щоб підкинути монету", 
+            settings: "Налаштування", genSett: "Генерація", delay: "Затримка (сек)",
+            dataSett: "Дані та Експорт", exportTxt: "Експорт у .TXT",
+            aboutSett: "Про додаток", version: "Версія", support: "Підтримка"
+        },
+        en: { 
+            min:"Min", max:"Max", count:"Quantity", names:"Name List", 
+            nMode:"Numbers", nameMode:"Names", coinMode:"Coin", btn:"Generate", 
+            history:"History", back:"Back", hTitle:"History", view:"Click to view", 
+            clear: "Clear History", noRepeat: "No repeats", 
+            coinHint: "Tap generate to flip the coin", 
+            settings: "Settings", genSett: "Generation", delay: "Delay (sec)",
+            dataSett: "Data & Export", exportTxt: "Export to .TXT",
+            aboutSett: "About", version: "Version", support: "Support"
+        },
+        ru: { 
+            min:"Мин", max:"Макс", count:"Кол-во", names:"Список имен", 
+            nMode:"Числа", nameMode:"Имена", coinMode:"Монета", btn:"Сгенерировать", 
+            history:"История", back:"Назад", hTitle:"История", view:"Нажмите для просмотра", 
+            clear: "Очистить историю", noRepeat: "Без повторов", 
+            coinHint: "Нажмите кнопку, чтобы подбросить монету", 
+            settings: "Настройки", genSett: "Генерация", delay: "Задержка (сек)",
+            dataSett: "Данные и Экспорт", exportTxt: "Экспорт в .TXT",
+            aboutSett: "О приложении", version: "Версия", support: "Поддержка"
+        }
     };
 
     function setLang(lang) {
@@ -555,12 +824,27 @@
         document.getElementById('btn-nam-mode').innerText = d.nameMode;
         document.getElementById('btn-coi-mode').innerText = d.coinMode;
         document.getElementById('t-back').innerText = d.back;
+        document.getElementById('t-back-settings').innerText = d.back;
         document.getElementById('t-hist-title').innerText = d.hTitle;
+        document.getElementById('t-sett-title').innerText = d.settings;
         document.getElementById('t-view-all').innerText = d.view;
         document.getElementById('t-clear').innerText = d.clear;
         document.getElementById('t-no-repeat').innerText = d.noRepeat;
         document.getElementById('t-coin-hint').innerText = d.coinHint;
+        document.getElementById('t-settings-menu').innerText = d.settings;
+        document.getElementById('t-gen-settings').innerText = d.genSett;
+        document.getElementById('t-delay').innerText = d.delay;
+        document.getElementById('t-data-settings').innerText = d.dataSett;
+        document.getElementById('t-export-txt').innerText = d.exportTxt;
+        document.getElementById('t-about-settings').innerText = d.aboutSett;
+        document.getElementById('t-version').innerText = d.version;
+        document.getElementById('t-support').innerText = d.support;
+        
+        updateHeaderStates();
     }
+
+    // Initialize all headers on load
+    window.onload = initHeaders;
 </script>
 </body>
 </html>
