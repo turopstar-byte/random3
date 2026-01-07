@@ -16,6 +16,9 @@
             --ios-switcher: rgba(118, 118, 128, 0.12);
             --ios-hover: rgba(0, 0, 0, 0.05);
             --ios-red: #ff3b30;
+            --ios-green: #34c759;
+            --ios-gold: #ffcc00;
+            --ios-silver: #adb5bd;
         }
 
         [data-theme="dark"] {
@@ -45,11 +48,12 @@
 
         .top-bar {
             width: 100%;
-            max-width: 380px;
+            max-width: 360px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            box-sizing: border-box;
         }
 
         #clock {
@@ -95,13 +99,7 @@
             z-index: 50;
         }
 
-        .container.hidden { display: none; }
-        .history-container.active { 
-            display: block; 
-            position: relative; 
-            opacity: 1; 
-            transform: scale(1); 
-        }
+        .history-container.active { display: block; position: relative; opacity: 1; transform: scale(1); }
 
         .app-title {
             display: flex; align-items: center; justify-content: center;
@@ -116,8 +114,8 @@
 
         .mode-btn {
             flex: 1; padding: 8px; border: none; border-radius: 10px;
-            background: transparent; font-size: 14px; font-weight: 600;
-            color: var(--ios-text); cursor: pointer;
+            background: transparent; font-size: 13px; font-weight: 600;
+            color: var(--ios-text); cursor: pointer; transition: 0.2s;
         }
 
         .mode-btn.active { background: white; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
@@ -127,12 +125,11 @@
             position: relative; background: var(--ios-input);
             border-radius: 20px; margin-bottom: 20px; height: 120px;
             display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
+            overflow: hidden; perspective: 1000px;
         }
 
-        /* Вертикальна прокрутка виводу */
         #output { 
-            font-size: 2rem; 
+            font-size: 1.8rem; 
             font-weight: 700; 
             padding: 15px 40px; 
             width: 100%;
@@ -144,6 +141,23 @@
             box-sizing: border-box;
         }
         #output::-webkit-scrollbar { display: none; }
+
+        /* 3D Coin Style */
+        .coin {
+            width: 80px; height: 80px; position: absolute;
+            transform-style: preserve-3d; transition: transform 2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: none;
+        }
+        .coin-side {
+            position: absolute; width: 100%; height: 100%; border-radius: 50%;
+            backface-visibility: hidden; display: flex; align-items: center;
+            justify-content: center; font-size: 30px; color: white; border: 4px solid rgba(0,0,0,0.1);
+        }
+        .heads { background: var(--ios-gold); transform: rotateY(0deg); }
+        .tails { background: var(--ios-silver); transform: rotateY(180deg); }
+
+        .action-btns { position: absolute; top: 10px; right: 10px; display: flex; gap: 12px; }
+        .action-btn { background: transparent; border: none; color: var(--ios-blue); font-size: 1.1rem; cursor: pointer; z-index: 10; }
 
         #dice-anim {
             display: none; position: absolute; font-size: 3.5rem;
@@ -158,14 +172,36 @@
             75% { transform: translate(-50%, -45%) rotate(15deg); }
         }
 
-        .copy-btn { position: absolute; top: 12px; right: 12px; background: transparent; border: none; color: var(--ios-blue); font-size: 1.2rem; cursor: pointer; z-index: 10; }
-
         .input-section { display: none; }
         .input-section.active { display: block; }
-        .input-group { background: var(--ios-input); border-radius: 14px; padding: 12px 16px; margin-bottom: 12px; }
+        .input-group { background: var(--ios-input); border-radius: 14px; padding: 12px 16px; margin-bottom: 12px; position: relative; }
         label { font-size: 11px; font-weight: 600; color: var(--ios-gray); text-transform: uppercase; margin-bottom: 4px; display: block; }
         input, textarea { width: 100%; background: transparent; border: none; font-size: 17px; color: var(--ios-text); outline: none; }
         textarea { height: 70px; resize: none; }
+
+        .file-label {
+            position: absolute; right: 12px; bottom: 12px; color: var(--ios-blue); cursor: pointer; font-size: 1.1rem;
+        }
+
+        .toggle-group {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--ios-input); border-radius: 14px; padding: 12px 16px; margin-bottom: 12px;
+        }
+        .toggle-group span { font-size: 15px; font-weight: 500; }
+        .switch {
+            position: relative; display: inline-block; width: 51px; height: 31px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc; transition: .4s; border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 27px; width: 27px; left: 2px; bottom: 2px;
+            background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        }
+        input:checked + .slider { background-color: var(--ios-green); }
+        input:checked + .slider:before { transform: translateX(20px); }
 
         .btn-gen {
             width: 100%; background: var(--ios-blue); color: white;
@@ -177,9 +213,7 @@
             margin-top: 25px; font-size: 13px; color: var(--ios-gray);
             text-align: center; padding: 12px; cursor: pointer;
             border-radius: 15px; background: var(--ios-input);
-            transition: all 0.2s ease;
         }
-        .history-trigger:active { transform: scale(0.97); background: var(--ios-hover); }
 
         .history-list { max-height: 300px; overflow-y: auto; margin: 15px 0; }
         .history-item {
@@ -197,10 +231,8 @@
         .clear-btn {
             width: 100%; padding: 12px; color: var(--ios-red);
             font-size: 14px; font-weight: 500; border: none;
-            background: transparent; cursor: pointer; margin-top: 5px;
-            display: none;
+            background: transparent; cursor: pointer; display: none;
         }
-        .clear-btn:active { opacity: 0.5; }
 
         .socials { display: flex; justify-content: center; gap: 30px; margin-top: 25px; }
         .socials a { color: var(--ios-blue); font-size: 1.5rem; }
@@ -230,13 +262,22 @@
 
         <div class="mode-switcher">
             <button class="mode-btn active" id="btn-num-mode" onclick="switchMode('numbers')">Numbers</button>
-            <button class="mode-btn" id="btn-name-mode" onclick="switchMode('names')">Names</button>
+            <button class="mode-btn" id="btn-nam-mode" onclick="switchMode('names')">Names</button>
+            <button class="mode-btn" id="btn-coi-mode" onclick="switchMode('coin')">Coin</button>
         </div>
 
         <div class="display-wrapper">
-            <button class="copy-btn" onclick="copyResult()"><i class="far fa-copy"></i></button>
+            <div class="action-btns">
+                <button class="action-btn" onclick="shareResult()"><i class="fas fa-arrow-up-from-bracket"></i></button>
+                <button class="action-btn" id="copy-btn" onclick="copyResult()"><i class="far fa-copy"></i></button>
+            </div>
             <i id="dice-anim" class="fas fa-dice"></i>
             <div id="output">0</div>
+            
+            <div id="coin-obj" class="coin">
+                <div class="coin-side heads"><i class="fas fa-crown"></i></div>
+                <div class="coin-side tails"><i class="fas fa-coins"></i></div>
+            </div>
         </div>
 
         <div id="numbers-input" class="input-section active">
@@ -254,16 +295,33 @@
                 <label id="t-count">Quantity</label>
                 <input type="number" id="count" value="1">
             </div>
+            <div class="toggle-group">
+                <span id="t-no-repeat">Без повторів</span>
+                <label class="switch">
+                    <input type="checkbox" id="no-repeat">
+                    <span class="slider"></span>
+                </label>
+            </div>
         </div>
 
         <div id="names-input" class="input-section">
             <div class="input-group">
                 <label id="t-names">Name List</label>
                 <textarea id="names-list" placeholder="John, Anna..."></textarea>
+                <label for="file-upload" class="file-label">
+                    <i class="fas fa-paperclip"></i>
+                </label>
+                <input type="file" id="file-upload" style="display:none" accept=".txt,.csv" onchange="handleFileUpload(this)">
             </div>
             <div class="input-group">
                 <label id="t-name-count">Winners Count</label>
                 <input type="number" id="name-count" value="1" min="1">
+            </div>
+        </div>
+
+        <div id="coin-input" class="input-section">
+            <div class="input-group" style="text-align: center;">
+                <p id="t-coin-hint" style="margin: 5px 0; font-size: 14px; opacity: 0.8;">Натисніть кнопку, щоб підкинути монету</p>
             </div>
         </div>
 
@@ -292,6 +350,8 @@
 
 <script>
     let currentMode = 'numbers';
+    let currentLang = 'uk';
+    let coinRotation = 0;
 
     function updateClock() {
         const now = new Date();
@@ -314,15 +374,55 @@
 
     function switchMode(mode) {
         currentMode = mode;
+        const out = document.getElementById('output');
+        const coinObj = document.getElementById('coin-obj');
+        
+        // Візуальне перемикання між цифровим виводом та монетою
+        if (mode === 'coin') {
+            out.style.display = 'none';
+            coinObj.style.display = 'block';
+        } else {
+            out.style.display = 'block';
+            coinObj.style.display = 'none';
+            out.innerText = (mode === 'numbers') ? '0' : '';
+        }
+
         document.querySelectorAll('.input-section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-        if(mode === 'numbers') {
-            document.getElementById('numbers-input').classList.add('active');
-            document.getElementById('btn-num-mode').classList.add('active');
-        } else {
-            document.getElementById('names-input').classList.add('active');
-            document.getElementById('btn-name-mode').classList.add('active');
-        }
+        
+        document.getElementById(mode + '-input').classList.add('active');
+        document.getElementById('btn-' + mode.substring(0, 3) + '-mode').classList.add('active');
+    }
+
+    function handleFileUpload(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('names-list').value = e.target.result;
+        };
+        reader.readAsText(file);
+    }
+
+    async function shareResult() {
+        let val = document.getElementById('output').innerText;
+        if (currentMode === 'coin') val = document.getElementById('t-coin-hint').innerText;
+        if (!val || val === "0" || val === "...") return;
+        
+        const shareData = {
+            title: 'Randomizer Pro',
+            text: `Мій результат: ${val} \nЗгенеровано в Randomizer Pro!`,
+            url: window.location.href
+        };
+
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+            } else {
+                navigator.clipboard.writeText(shareData.text);
+                alert(currentLang === 'uk' ? "Текст для поширення скопійовано!" : "Share text copied!");
+            }
+        } catch (err) { console.log(err); }
     }
 
     function toggleScreens(showHistory) {
@@ -340,20 +440,57 @@
     function generate() {
         const out = document.getElementById('output');
         const dice = document.getElementById('dice-anim');
+        const coinObj = document.getElementById('coin-obj');
+
+        if (currentMode === 'coin') {
+            const isHeads = Math.random() < 0.5;
+            const spins = (Math.floor(Math.random() * 5) + 5) * 360; 
+            coinRotation += spins + (isHeads ? 0 : 180);
+            
+            coinObj.style.transform = `rotateY(${coinRotation}deg)`;
+            
+            const resText = isHeads ? 
+                (currentLang === 'uk' ? "Орел" : currentLang === 'en' ? "Heads" : "Орел") : 
+                (currentLang === 'uk' ? "Решка" : currentLang === 'en' ? "Tails" : "Решка");
+
+            setTimeout(() => {
+                document.getElementById('t-coin-hint').innerText = resText;
+                addToLog(resText);
+            }, 2000);
+            return;
+        }
+
+        // Логіка для Numbers та Names (без змін)
         out.classList.add('rolling');
         dice.classList.add('animate-dice');
+
         setTimeout(() => {
             dice.classList.remove('animate-dice');
             out.classList.remove('rolling');
             let resText = "";
+
             if(currentMode === 'numbers') {
                 const min = parseInt(document.getElementById('min').value) || 0;
                 const max = parseInt(document.getElementById('max').value) || 100;
                 const count = parseInt(document.getElementById('count').value) || 1;
-                let res = [];
-                for(let i=0; i<count; i++) res.push(Math.floor(Math.random() * (max - min + 1)) + min);
-                resText = res.join(', ');
-            } else {
+                const noRepeat = document.getElementById('no-repeat').checked;
+
+                if (noRepeat && count > (max - min + 1)) {
+                    resText = currentLang === 'uk' ? "Замалий діапазон" : "Range too small";
+                } else {
+                    let res = [];
+                    if (noRepeat) {
+                        let pool = Array.from({length: max - min + 1}, (_, i) => min + i);
+                        for(let i=0; i<count; i++) {
+                            const idx = Math.floor(Math.random() * pool.length);
+                            res.push(pool.splice(idx, 1)[0]);
+                        }
+                    } else {
+                        for(let i=0; i<count; i++) res.push(Math.floor(Math.random() * (max - min + 1)) + min);
+                    }
+                    resText = res.join(', ');
+                }
+            } else if (currentMode === 'names') {
                 const input = document.getElementById('names-list').value;
                 const count = parseInt(document.getElementById('name-count').value) || 1;
                 const names = input.split(/[, \n]+/).filter(n => n.trim() !== "");
@@ -368,8 +505,9 @@
                     resText = winners.join(', ');
                 }
             }
+
             out.innerText = resText;
-            if(resText !== "...") addToLog(resText);
+            if(resText !== "..." && !resText.includes("діапазон")) addToLog(resText);
         }, 600);
     }
 
@@ -389,20 +527,22 @@
     }
 
     function copyResult() {
-        const text = document.getElementById('output').innerText;
+        let text = document.getElementById('output').innerText;
+        if (currentMode === 'coin') text = document.getElementById('t-coin-hint').innerText;
         navigator.clipboard.writeText(text);
-        const icon = document.querySelector('.copy-btn i');
+        const icon = document.querySelector('#copy-btn i');
         icon.className = 'fas fa-check';
         setTimeout(() => icon.className = 'far fa-copy', 1500);
     }
 
     const i18n = {
-        uk: { min:"Мін", max:"Макс", count:"Кількість", names:"Список імен", nMode:"Числа", nameMode:"Імена", btn:"Згенерувати", history:"Історія", back:"Назад", hTitle:"Історія", view:"Натисніть для перегляду", clear: "Очистити історію" },
-        en: { min:"Min", max:"Max", count:"Quantity", names:"Name List", nMode:"Numbers", nameMode:"Names", btn:"Generate", history:"History", back:"Back", hTitle:"History", view:"Click to view", clear: "Clear History" },
-        ru: { min:"Мин", max:"Макс", count:"Кол-во", names:"Список имен", nMode:"Числа", nameMode:"Имена", btn:"Сгенерировать", history:"История", back:"Назад", hTitle:"История", view:"Нажмите для просмотра", clear: "Очистить историю" }
+        uk: { min:"Мін", max:"Макс", count:"Кількість", names:"Список імен", nMode:"Числа", nameMode:"Імена", coinMode:"Монета", btn:"Згенерувати", history:"Історія", back:"Назад", hTitle:"Історія", view:"Натисніть для перегляду", clear: "Очистити історію", noRepeat: "Без повторів", coinHint: "Натисніть кнопку, щоб підкинути монету" },
+        en: { min:"Min", max:"Max", count:"Quantity", names:"Name List", nMode:"Numbers", nameMode:"Names", coinMode:"Coin", btn:"Generate", history:"History", back:"Back", hTitle:"History", view:"Click to view", clear: "Clear History", noRepeat: "No repeats", coinHint: "Tap generate to flip the coin" },
+        ru: { min:"Мин", max:"Макс", count:"Кол-во", names:"Список имен", nMode:"Числа", nameMode:"Имена", coinMode:"Монета", btn:"Сгенерировать", history:"История", back:"Назад", hTitle:"История", view:"Нажмите для просмотра", clear: "Очистить историю", noRepeat: "Без повторов", coinHint: "Нажмите кнопку, чтобы подбросить монету" }
     };
 
     function setLang(lang) {
+        currentLang = lang;
         const d = i18n[lang];
         document.getElementById('t-min').innerText = d.min;
         document.getElementById('t-max').innerText = d.max;
@@ -411,11 +551,14 @@
         document.getElementById('t-btn').innerText = d.btn;
         document.getElementById('t-history').innerText = d.history;
         document.getElementById('btn-num-mode').innerText = d.nMode;
-        document.getElementById('btn-name-mode').innerText = d.nameMode;
+        document.getElementById('btn-nam-mode').innerText = d.nameMode;
+        document.getElementById('btn-coi-mode').innerText = d.coinMode;
         document.getElementById('t-back').innerText = d.back;
         document.getElementById('t-hist-title').innerText = d.hTitle;
         document.getElementById('t-view-all').innerText = d.view;
         document.getElementById('t-clear').innerText = d.clear;
+        document.getElementById('t-no-repeat').innerText = d.noRepeat;
+        document.getElementById('t-coin-hint').innerText = d.coinHint;
     }
 </script>
 </body>
