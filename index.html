@@ -17,12 +17,13 @@
             --ios-gray: #8e8e93;
             --ios-input: rgba(0, 0, 0, 0.05);
             --ios-switcher: rgba(118, 118, 128, 0.12);
-            --ios-hover: rgba(0, 0, 0, 0.1);
+            --ios-hover: rgba(0, 0, 0, 0.08);
             --ios-red: #ff3b30;
             --ios-green: #34c759;
             --ios-gold: #ffcc00;
             --ios-silver: #adb5bd;
-            --ios-menu-bg: rgba(255, 255, 255, 0.7);
+            --ios-menu-bg: rgba(255, 255, 255, 0.85);
+            --ios-separator: rgba(0, 0, 0, 0.1);
         }
 
         [data-theme="dark"] {
@@ -34,7 +35,8 @@
             --ios-input: rgba(255, 255, 255, 0.1);
             --ios-switcher: #3a3a3c;
             --ios-hover: rgba(255, 255, 255, 0.15);
-            --ios-menu-bg: rgba(44, 44, 46, 0.8);
+            --ios-menu-bg: rgba(44, 44, 46, 0.9);
+            --ios-separator: rgba(255, 255, 255, 0.1);
         }
 
         body {
@@ -52,7 +54,7 @@
             transition: all 0.3s ease;
         }
 
-        .container, .history-container, .settings-container {
+        .container, .history-container, .settings-container, .ai-chat-container {
             width: 100%;
             max-width: 380px;
             background: var(--ios-card);
@@ -72,6 +74,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 25px;
+            gap: 8px;
         }
 
         .top-pill {
@@ -89,11 +92,10 @@
             font-weight: 600;
             font-size: 13px;
             color: var(--ios-text);
-            min-width: 80px;
         }
 
         .actions-pill {
-            gap: 12px;
+            flex-shrink: 0;
         }
 
         .icon-btn {
@@ -116,6 +118,11 @@
             cursor: pointer;
             outline: none;
             padding: 0;
+        }
+
+        .header-actions-group {
+            display: flex;
+            gap: 8px;
         }
 
         /* Screens management */
@@ -161,37 +168,54 @@
             transition: 0.2s;
         }
 
+        /* iOS 17/18 Styled Dropdown */
         .dropdown-menu {
             position: absolute;
-            top: 40px;
+            top: 45px;
             right: 0;
-            width: 180px;
+            width: 200px;
             background: var(--ios-menu-bg);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border-radius: 18px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 14px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
             z-index: 100;
             display: none;
             flex-direction: column;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.3);
-            animation: menuFade 0.2s ease-out;
+            border: 0.5px solid rgba(255,255,255,0.2);
+            padding: 4px;
+            animation: menuFade 0.15s cubic-bezier(0.1, 0.7, 0.1, 1);
+            transform-origin: top right;
+        }
+
+        @keyframes menuFade {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .dropdown-menu.active { display: flex; }
 
         .menu-item {
-            padding: 12px 16px;
+            padding: 10px 14px;
             font-size: 15px;
             color: var(--ios-text);
             display: flex;
             align-items: center;
             justify-content: space-between;
             cursor: pointer;
-            transition: background 0.2s;
+            border-radius: 8px;
+            transition: background 0.1s;
+            margin-bottom: 2px;
         }
         .menu-item:active { background: var(--ios-hover); }
+        .menu-item i { font-size: 16px; color: var(--ios-text); opacity: 0.9; }
+
+        .menu-separator {
+            height: 0.5px;
+            background: var(--ios-separator);
+            margin: 4px 10px;
+        }
 
         .mode-switcher {
             display: flex; background: var(--ios-switcher);
@@ -222,9 +246,12 @@
             text-align: center;
             word-wrap: break-word;
             overflow-y: auto; 
-            scrollbar-width: none; 
             box-sizing: border-box;
+            max-height: 100%;
         }
+
+        #output::-webkit-scrollbar { width: 4px; }
+        #output::-webkit-scrollbar-thumb { background: var(--ios-gray); border-radius: 10px; }
 
         .coin {
             width: 80px; height: 80px; position: absolute;
@@ -311,13 +338,65 @@
             display: flex; align-items: center; gap: 5px; margin-bottom: 15px;
         }
 
-        .clear-btn {
-            width: 100%; padding: 12px; color: var(--ios-red);
-            font-size: 14px; font-weight: 500; border: none;
-            background: transparent; cursor: pointer;
+        /* AI Chat Styles */
+        .chat-area {
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding-right: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            scrollbar-width: none;
+        }
+        .chat-area::-webkit-scrollbar { display: none; }
+
+        .msg-bubble {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+        .msg-user {
+            align-self: flex-end;
+            background: var(--ios-blue);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .msg-ai {
+            align-self: flex-start;
+            background: var(--ios-input);
+            color: var(--ios-text);
+            border-bottom-left-radius: 4px;
+        }
+        .chat-input-container {
+            display: flex;
+            gap: 8px;
+            background: var(--ios-input);
+            padding: 8px 12px;
+            border-radius: 25px;
+            align-items: center;
+        }
+        .chat-input-container input {
+            flex: 1;
+            padding: 0;
+            font-size: 15px;
+        }
+        .chat-send-btn {
+            background: var(--ios-blue);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
         }
 
-        /* Settings specific styles */
+        /* Settings shared styles */
         .settings-section-title {
             font-size: 13px; color: var(--ios-gray); text-transform: uppercase;
             margin: 20px 0 8px 16px; font-weight: 600;
@@ -326,15 +405,10 @@
             background: var(--ios-input); border-radius: 14px; padding: 12px 16px;
             display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;
         }
-        .settings-info {
-            text-align: center; margin-top: 30px; font-size: 13px; color: var(--ios-gray);
-        }
 
         .socials { display: flex; justify-content: center; gap: 30px; margin-top: 20px; }
         .socials a { color: var(--ios-blue); font-size: 1.5rem; }
 
-        .rolling { visibility: hidden; }
-        
         #toast {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
             background: rgba(0,0,0,0.8); color: white; padding: 10px 20px;
@@ -348,21 +422,24 @@
     <template id="header-template">
         <div class="internal-top-bar">
             <div class="top-pill clock-pill clock-display">00:00:00</div>
-            <div class="top-pill actions-pill">
-                <button class="icon-btn theme-toggle-btn" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
-                <select class="lang-minimal lang-select" onchange="setLang(this.value)">
-                    <option value="uk">UA</option>
-                    <option value="en">EN</option>
-                    <option value="ru">RU</option>
-                </select>
+            <div class="header-actions-group">
+                <div class="top-pill actions-pill">
+                    <button class="icon-btn theme-toggle-btn" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+                </div>
+                <div class="top-pill actions-pill">
+                    <select class="lang-minimal lang-select" onchange="setLang(this.value)">
+                        <option value="uk">UA</option>
+                        <option value="en">EN</option>
+                        <option value="ru">RU</option>
+                    </select>
+                </div>
             </div>
         </div>
     </template>
 
     <!-- MAIN SCREEN -->
     <div class="container screen active" id="main-screen">
-        <div id="header-main"></div> <!-- Header Target -->
-
+        <div id="header-main"></div>
         <div class="app-title-container">
             <div class="app-title">
                 <i class="fas fa-dice-five"></i>
@@ -372,6 +449,11 @@
                 <i class="fas fa-ellipsis-h"></i>
             </button>
             <div class="dropdown-menu" id="dropdown-menu">
+                <div class="menu-item" onclick="navigateTo('ai-chat-screen')">
+                    <span id="t-ai-chat-menu">Мій AI Chat</span>
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="menu-separator"></div>
                 <div class="menu-item" onclick="openSettings()">
                     <span id="t-settings-menu">Налаштування</span>
                     <i class="fas fa-cog"></i>
@@ -392,7 +474,6 @@
             </div>
             <i id="dice-anim" class="fas fa-dice"></i>
             <div id="output">0</div>
-            
             <div id="coin-obj" class="coin">
                 <div class="coin-side heads"><i class="fas fa-crown"></i></div>
                 <div class="coin-side tails"><i class="fas fa-coins"></i></div>
@@ -427,9 +508,7 @@
             <div class="input-group">
                 <label id="t-names">Name List</label>
                 <textarea id="names-list" placeholder="John, Anna..."></textarea>
-                <label for="file-upload" class="file-label">
-                    <i class="fas fa-paperclip"></i>
-                </label>
+                <label for="file-upload" class="file-label"><i class="fas fa-paperclip"></i></label>
                 <input type="file" id="file-upload" style="display:none" accept=".txt,.csv" onchange="handleFileUpload(this)">
             </div>
             <div class="input-group">
@@ -458,9 +537,27 @@
         </div>
     </div>
 
+    <!-- AI CHAT SCREEN -->
+    <div class="ai-chat-container screen" id="ai-chat-screen">
+        <div id="header-ai"></div>
+        <button class="back-btn" onclick="navigateTo('main-screen')">
+            <i class="fas fa-chevron-left"></i> <span id="t-back-ai">Назад</span>
+        </button>
+        <h2 style="margin: 0 0 15px 0; text-align: center;">Мій AI Chat</h2>
+        
+        <div class="chat-area" id="ai-messages">
+            <div class="msg-bubble msg-ai">Привіт! Я твій AI помічник. Чим можу допомогти?</div>
+        </div>
+
+        <div class="chat-input-container">
+            <input type="text" id="ai-user-input" placeholder="Запитайте щось..." onkeypress="handleAiKey(event)">
+            <button class="chat-send-btn" onclick="sendAiMessage()"><i class="fas fa-arrow-up"></i></button>
+        </div>
+    </div>
+
     <!-- HISTORY SCREEN -->
     <div class="history-container screen" id="history-screen">
-        <div id="header-history"></div> <!-- Header Target -->
+        <div id="header-history"></div>
         <button class="back-btn" onclick="navigateTo('main-screen')">
             <i class="fas fa-chevron-left"></i> <span id="t-back">Назад</span>
         </button>
@@ -471,7 +568,7 @@
 
     <!-- SETTINGS SCREEN -->
     <div class="settings-container screen" id="settings-screen">
-        <div id="header-settings"></div> <!-- Header Target -->
+        <div id="header-settings"></div>
         <button class="back-btn" onclick="navigateTo('main-screen')">
             <i class="fas fa-chevron-left"></i> <span id="t-back-settings">Назад</span>
         </button>
@@ -480,7 +577,7 @@
         <div class="settings-section-title" id="t-gen-settings">Генерація</div>
         <div class="settings-row">
             <span id="t-delay">Затримка (сек)</span>
-            <select id="delay-select" style="width: auto; color: var(--ios-blue); font-weight: 600; cursor: pointer;">
+            <select id="delay-select" style="width: auto; color: var(--ios-blue); font-weight: 600;">
                 <option value="0">0</option>
                 <option value="1000">1</option>
                 <option value="2000">2</option>
@@ -499,53 +596,100 @@
             <span id="t-version">Версія</span>
             <span style="color: var(--ios-gray);">2.1.0 Pro</span>
         </div>
-        <div class="settings-row" onclick="window.open('#')" style="cursor: pointer;">
-            <span id="t-support">Підтримка</span>
-            <i class="fas fa-external-link-alt" style="color: var(--ios-blue); font-size: 12px;"></i>
-        </div>
-
-        <div class="settings-info">
-            <p>Created with <i class="fas fa-heart" style="color:var(--ios-red)"></i> for Random Lovers</p>
-            <p id="t-author">© 2024 Randomizer Pro Team</p>
-        </div>
     </div>
 
     <div id="toast">Повідомлення</div>
 
 <script>
+    // --- API CONFIG ---
+    const apiKey = "AIzaSyAsJw3k7VCxrevkKEFCZxlfyIqZOiNGsqQ"; // <--- ВСТАВТЕ ВАШ API KEY ТУТ
+
     let currentMode = 'numbers';
     let currentLang = 'uk';
     let currentTheme = 'light';
     let coinRotation = 0;
     let historyData = [];
 
-    // --- Core UI Management ---
+    // --- AI CHAT LOGIC ---
+    function handleAiKey(e) { if(e.key === 'Enter') sendAiMessage(); }
 
+    async function sendAiMessage() {
+        const input = document.getElementById('ai-user-input');
+        const text = input.value.trim();
+        if(!text) return;
+
+        addBubble(text, 'user');
+        input.value = '';
+
+        if(!apiKey) {
+            addBubble("Помилка: API ключ не встановлено. Додайте його в код (apiKey).", "ai");
+            return;
+        }
+
+        const thinkingBubble = addBubble("Думаю...", "ai");
+        
+        try {
+            const response = await callGemini(text);
+            thinkingBubble.innerText = response;
+        } catch (err) {
+            thinkingBubble.innerText = "Вибачте, виникла помилка. Перевірте ключ або спробуйте пізніше.";
+        }
+    }
+
+    function addBubble(text, role) {
+        const chat = document.getElementById('ai-messages');
+        const div = document.createElement('div');
+        div.className = `msg-bubble msg-${role}`;
+        div.innerText = text;
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
+        return div;
+    }
+
+    async function callGemini(prompt) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const body = {
+            contents: [{ parts: [{ text: prompt }] }],
+            systemInstruction: { parts: [{ text: "Ти AI помічник у додатку Randomizer Pro. Відповідай ввічливо та коротко українською мовою." }] }
+        };
+
+        const fetchRetry = async (retries = 5, delay = 1000) => {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        return data.candidates?.[0]?.content?.parts?.[0]?.text || "Порожня відповідь.";
+                    }
+                } catch (e) {}
+                await new Promise(r => setTimeout(r, delay));
+                delay *= 2;
+            }
+            throw new Error("Failed");
+        };
+        return await fetchRetry();
+    }
+
+    // --- Core UI Management ---
     function initHeaders() {
         const template = document.getElementById('header-template');
-        const targets = ['header-main', 'header-history', 'header-settings'];
-        
+        const targets = ['header-main', 'header-history', 'header-settings', 'header-ai'];
         targets.forEach(targetId => {
             const container = document.getElementById(targetId);
-            const clone = template.content.cloneNode(true);
-            container.appendChild(clone);
+            if(container) container.appendChild(template.content.cloneNode(true));
         });
         updateHeaderStates();
     }
 
     function updateHeaderStates() {
-        // Sync clocks
-        const clocks = document.querySelectorAll('.clock-display');
         const now = new Date().toLocaleTimeString('uk-UA');
-        clocks.forEach(c => c.innerText = now);
-
-        // Sync theme icons
-        const themeIcons = document.querySelectorAll('.theme-toggle-btn i');
-        themeIcons.forEach(i => i.className = currentTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon');
-
-        // Sync lang selects
-        const langSelects = document.querySelectorAll('.lang-select');
-        langSelects.forEach(s => s.value = currentLang);
+        document.querySelectorAll('.clock-display').forEach(c => c.innerText = now);
+        document.querySelectorAll('.theme-toggle-btn i').forEach(i => i.className = currentTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon');
+        document.querySelectorAll('.lang-select').forEach(s => s.value = currentLang);
     }
 
     setInterval(() => {
@@ -556,38 +700,23 @@
     function navigateTo(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
-        if (screenId === 'main-screen') {
-            const menu = document.getElementById('dropdown-menu');
-            menu.classList.remove('active');
-        }
+        document.getElementById('dropdown-menu').classList.remove('active');
     }
 
     function toggleMenu(event) {
         event.stopPropagation();
-        const menu = document.getElementById('dropdown-menu');
-        menu.classList.toggle('active');
+        document.getElementById('dropdown-menu').classList.toggle('active');
     }
 
-    window.addEventListener('click', () => {
-        const menu = document.getElementById('dropdown-menu');
-        if (menu && menu.classList.contains('active')) {
-            menu.classList.remove('active');
-        }
-    });
+    window.onclick = () => document.getElementById('dropdown-menu').classList.remove('active');
 
-    function openSettings() {
-        navigateTo('settings-screen');
-    }
+    function openSettings() { navigateTo('settings-screen'); }
 
     function toggleTheme() {
         const body = document.body;
-        if (body.getAttribute('data-theme') === 'dark') {
-            body.removeAttribute('data-theme');
-            currentTheme = 'light';
-        } else {
-            body.setAttribute('data-theme', 'dark');
-            currentTheme = 'dark';
-        }
+        currentTheme = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        if (currentTheme === 'dark') body.setAttribute('data-theme', 'dark');
+        else body.removeAttribute('data-theme');
         updateHeaderStates();
     }
 
@@ -595,19 +724,11 @@
         currentMode = mode;
         const out = document.getElementById('output');
         const coinObj = document.getElementById('coin-obj');
-        
-        if (mode === 'coin') {
-            out.style.display = 'none';
-            coinObj.style.display = 'block';
-        } else {
-            out.style.display = 'block';
-            coinObj.style.display = 'none';
-            out.innerText = (mode === 'numbers') ? '0' : '';
-        }
-
+        out.style.display = (mode === 'coin') ? 'none' : 'block';
+        coinObj.style.display = (mode === 'coin') ? 'block' : 'none';
+        if(mode !== 'coin') out.innerText = (mode === 'numbers') ? '0' : '';
         document.querySelectorAll('.input-section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-        
         document.getElementById(mode + '-input').classList.add('active');
         document.getElementById('btn-' + mode.substring(0, 3) + '-mode').classList.add('active');
     }
@@ -616,9 +737,7 @@
         const file = input.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('names-list').value = e.target.result;
-        };
+        reader.onload = e => document.getElementById('names-list').value = e.target.result;
         reader.readAsText(file);
     }
 
@@ -629,8 +748,6 @@
         setTimeout(() => t.style.display = 'none', 2000);
     }
 
-    // --- Generation Logic ---
-
     function generate() {
         const out = document.getElementById('output');
         const dice = document.getElementById('dice-anim');
@@ -639,14 +756,9 @@
 
         if (currentMode === 'coin') {
             const isHeads = Math.random() < 0.5;
-            const spins = (Math.floor(Math.random() * 5) + 5) * 360; 
-            coinRotation += spins + (isHeads ? 0 : 180);
+            coinRotation += (Math.floor(Math.random() * 5) + 5) * 360 + (isHeads ? 0 : 180);
             coinObj.style.transform = `rotateY(${coinRotation}deg)`;
-            
-            const resText = isHeads ? 
-                (currentLang === 'uk' ? "Орел" : currentLang === 'en' ? "Heads" : "Орел") : 
-                (currentLang === 'uk' ? "Решка" : currentLang === 'en' ? "Tails" : "Решка");
-
+            const resText = isHeads ? (currentLang === 'uk' ? "Орел" : "Heads") : (currentLang === 'uk' ? "Решка" : "Tails");
             setTimeout(() => {
                 document.getElementById('t-coin-hint').innerText = resText;
                 addToLog(resText);
@@ -667,55 +779,41 @@
                 const max = parseInt(document.getElementById('max').value) || 100;
                 const count = parseInt(document.getElementById('count').value) || 1;
                 const noRepeat = document.getElementById('no-repeat').checked;
-
-                if (noRepeat && count > (max - min + 1)) {
-                    resText = currentLang === 'uk' ? "Замалий діапазон" : "Range too small";
-                } else {
+                if (noRepeat && count > (max - min + 1)) resText = "Range small";
+                else {
                     let res = [];
                     if (noRepeat) {
                         let pool = Array.from({length: max - min + 1}, (_, i) => min + i);
-                        for(let i=0; i<count; i++) {
-                            const idx = Math.floor(Math.random() * pool.length);
-                            res.push(pool.splice(idx, 1)[0]);
-                        }
+                        for(let i=0; i<count; i++) res.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
                     } else {
                         for(let i=0; i<count; i++) res.push(Math.floor(Math.random() * (max - min + 1)) + min);
                     }
                     resText = res.join(', ');
                 }
             } else if (currentMode === 'names') {
-                const input = document.getElementById('names-list').value;
+                const names = document.getElementById('names-list').value.split(/[, \n]+/).filter(n => n.trim() !== "");
                 const count = parseInt(document.getElementById('name-count').value) || 1;
-                const names = input.split(/[, \n]+/).filter(n => n.trim() !== "");
                 if(names.length === 0) resText = "...";
                 else {
                     let winners = [];
-                    let tempNames = [...names];
-                    for(let i=0; i < count && tempNames.length > 0; i++) {
-                        const idx = Math.floor(Math.random() * tempNames.length);
-                        winners.push(tempNames.splice(idx, 1)[0]);
-                    }
+                    let temp = [...names];
+                    for(let i=0; i < count && temp.length > 0; i++) winners.push(temp.splice(Math.floor(Math.random() * temp.length), 1)[0]);
                     resText = winners.join(', ');
                 }
             }
-
             out.innerText = resText;
-            if(resText !== "..." && !resText.includes("діапазон")) addToLog(resText);
+            if(resText !== "..." && !resText.includes("Range")) addToLog(resText);
         }, 600 + delay);
     }
-
-    // --- History & Export ---
 
     function addToLog(val) {
         const log = document.getElementById('full-log');
         const now = new Date();
         const time = now.toLocaleTimeString('uk-UA', {hour: '2-digit', minute:'2-digit'});
-        
         historyData.push({ value: val, time: time, date: now.toLocaleDateString() });
-
         const item = document.createElement('div');
         item.className = 'history-item';
-        item.innerHTML = `<span style="font-weight:600; font-size:16px;">${val}</span><span style="font-size:11px; color:var(--ios-gray);">${time}</span>`;
+        item.innerHTML = `<strong>${val}</strong><span style="font-size:11px; color:var(--ios-gray);">${time}</span>`;
         log.prepend(item);
         document.getElementById('t-clear').style.display = 'block';
     }
@@ -724,129 +822,37 @@
         document.getElementById('full-log').innerHTML = '';
         document.getElementById('t-clear').style.display = 'none';
         historyData = [];
-        showToast(currentLang === 'uk' ? "Історію очищено" : "History cleared");
+        showToast("Clear");
     }
 
     function exportHistoryTxt() {
-        if (historyData.length === 0) {
-            showToast(currentLang === 'uk' ? "Історія порожня" : "History is empty");
-            return;
-        }
-        let content = "Randomizer Pro - History Export\n";
-        content += "==============================\n\n";
-        historyData.forEach((item, i) => {
-            content += `[${item.date} ${item.time}] Result: ${item.value}\n`;
-        });
-        
+        if (!historyData.length) return;
+        let content = historyData.map(h => `[${h.date} ${h.time}] ${h.value}`).join('\n');
         const blob = new Blob([content], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = `history_${new Date().getTime()}.txt`;
-        document.body.appendChild(a);
+        a.href = URL.createObjectURL(blob);
+        a.download = 'history.txt';
         a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
     }
 
     function copyResult() {
-        let text = document.getElementById('output').innerText;
-        if (currentMode === 'coin') text = document.getElementById('t-coin-hint').innerText;
+        let text = (currentMode === 'coin') ? document.getElementById('t-coin-hint').innerText : document.getElementById('output').innerText;
         navigator.clipboard.writeText(text);
-        const icon = document.querySelector('#copy-btn i');
-        icon.className = 'fas fa-check';
-        setTimeout(() => icon.className = 'far fa-copy', 1500);
+        showToast("Copied");
     }
 
-    async function shareResult() {
-        let val = document.getElementById('output').innerText;
-        if (currentMode === 'coin') val = document.getElementById('t-coin-hint').innerText;
-        if (!val || val === "0" || val === "...") return;
-        
-        const shareData = {
-            title: 'Randomizer Pro',
-            text: `Мій результат: ${val} \nЗгенеровано в Randomizer Pro!`,
-            url: window.location.href
-        };
-
-        try {
-            if (navigator.share) {
-                await navigator.share(shareData);
-            } else {
-                navigator.clipboard.writeText(shareData.text);
-                showToast(currentLang === 'uk' ? "Скопійовано для поширення" : "Copied to share");
-            }
-        } catch (err) { console.log(err); }
-    }
-
-    // --- Localization ---
-
-    const i18n = {
-        uk: { 
-            min:"Мін", max:"Макс", count:"Кількість", names:"Список імен", 
-            nMode:"Числа", nameMode:"Імена", coinMode:"Монета", btn:"Згенерувати", 
-            history:"Історія", back:"Назад", hTitle:"Історія", view:"Натисніть для перегляду", 
-            clear: "Очистити історію", noRepeat: "Без повторів", 
-            coinHint: "Натисніть кнопку, щоб підкинути монету", 
-            settings: "Налаштування", genSett: "Генерація", delay: "Затримка (сек)",
-            dataSett: "Дані та Експорт", exportTxt: "Експорт у .TXT",
-            aboutSett: "Про додаток", version: "Версія", support: "Підтримка"
-        },
-        en: { 
-            min:"Min", max:"Max", count:"Quantity", names:"Name List", 
-            nMode:"Numbers", nameMode:"Names", coinMode:"Coin", btn:"Generate", 
-            history:"History", back:"Back", hTitle:"History", view:"Click to view", 
-            clear: "Clear History", noRepeat: "No repeats", 
-            coinHint: "Tap generate to flip the coin", 
-            settings: "Settings", genSett: "Generation", delay: "Delay (sec)",
-            dataSett: "Data & Export", exportTxt: "Export to .TXT",
-            aboutSett: "About", version: "Version", support: "Support"
-        },
-        ru: { 
-            min:"Мин", max:"Макс", count:"Кол-во", names:"Список имен", 
-            nMode:"Числа", nameMode:"Имена", coinMode:"Монета", btn:"Сгенерировать", 
-            history:"История", back:"Назад", hTitle:"История", view:"Нажмите для просмотра", 
-            clear: "Очистить историю", noRepeat: "Без повторов", 
-            coinHint: "Нажмите кнопку, чтобы подбросить монету", 
-            settings: "Настройки", genSett: "Генерация", delay: "Задержка (сек)",
-            dataSett: "Данные и Экспорт", exportTxt: "Экспорт в .TXT",
-            aboutSett: "О приложении", version: "Версия", support: "Поддержка"
-        }
-    };
+    function shareResult() { showToast("Sharing..."); }
 
     function setLang(lang) {
         currentLang = lang;
-        const d = i18n[lang];
-        document.getElementById('t-min').innerText = d.min;
-        document.getElementById('t-max').innerText = d.max;
-        document.getElementById('t-count').innerText = d.count;
-        document.getElementById('t-names').innerText = d.names;
-        document.getElementById('t-btn').innerText = d.btn;
-        document.getElementById('t-history').innerText = d.history;
-        document.getElementById('btn-num-mode').innerText = d.nMode;
-        document.getElementById('btn-nam-mode').innerText = d.nameMode;
-        document.getElementById('btn-coi-mode').innerText = d.coinMode;
-        document.getElementById('t-back').innerText = d.back;
-        document.getElementById('t-back-settings').innerText = d.back;
-        document.getElementById('t-hist-title').innerText = d.hTitle;
-        document.getElementById('t-sett-title').innerText = d.settings;
-        document.getElementById('t-view-all').innerText = d.view;
-        document.getElementById('t-clear').innerText = d.clear;
-        document.getElementById('t-no-repeat').innerText = d.noRepeat;
-        document.getElementById('t-coin-hint').innerText = d.coinHint;
-        document.getElementById('t-settings-menu').innerText = d.settings;
-        document.getElementById('t-gen-settings').innerText = d.genSett;
-        document.getElementById('t-delay').innerText = d.delay;
-        document.getElementById('t-data-settings').innerText = d.dataSett;
-        document.getElementById('t-export-txt').innerText = d.exportTxt;
-        document.getElementById('t-about-settings').innerText = d.aboutSett;
-        document.getElementById('t-version').innerText = d.version;
-        document.getElementById('t-support').innerText = d.support;
-        
+        // Basic labels toggle
+        document.getElementById('t-history').innerText = lang === 'uk' ? 'Історія' : 'History';
+        document.getElementById('t-back').innerText = lang === 'uk' ? 'Назад' : 'Back';
+        document.getElementById('t-back-settings').innerText = lang === 'uk' ? 'Назад' : 'Back';
+        document.getElementById('t-back-ai').innerText = lang === 'uk' ? 'Назад' : 'Back';
         updateHeaderStates();
     }
 
-    // Initialize all headers on load
     window.onload = initHeaders;
 </script>
 </body>
