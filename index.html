@@ -2,7 +2,8 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Оновлений мета-тег для заборони масштабування -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Randomizer Pro</title>
     <!-- Додавання фавікона (Emoji іконка) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎲</text></svg>">
@@ -22,7 +23,7 @@
             --ios-green: #34c759;
             --ios-gold: #ffcc00;
             --ios-silver: #adb5bd;
-            --ios-menu-bg: rgba(255, 255, 255, 0.85);
+            --ios-menu-bg: rgba(255, 255, 255, 0.7);
             --ios-separator: rgba(0, 0, 0, 0.1);
         }
 
@@ -35,7 +36,7 @@
             --ios-input: rgba(255, 255, 255, 0.1);
             --ios-switcher: #3a3a3c;
             --ios-hover: rgba(255, 255, 255, 0.15);
-            --ios-menu-bg: rgba(44, 44, 46, 0.9);
+            --ios-menu-bg: rgba(28, 28, 30, 0.75);
             --ios-separator: rgba(255, 255, 255, 0.1);
         }
 
@@ -48,13 +49,18 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 20px;
+            justify-content: flex-start;
+            padding: 20px 20px 100px 20px;
             min-height: 100vh;
             transition: all 0.3s ease;
+            box-sizing: border-box;
+            /* Заборона жестів масштабування на рівні CSS */
+            touch-action: pan-x pan-y;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
         }
 
-        .container, .history-container, .settings-container, .ai-chat-container {
+        .container, .history-container, .settings-container, .ai-chat-container, .dev-container {
             width: 100%;
             max-width: 380px;
             background: var(--ios-card);
@@ -66,9 +72,9 @@
             border: 1px solid rgba(255,255,255,0.2);
             box-sizing: border-box;
             position: relative;
+            margin-top: 20px;
         }
 
-        /* Shared Header (Internal Top Bar) */
         .internal-top-bar {
             display: flex;
             justify-content: space-between;
@@ -125,7 +131,6 @@
             gap: 8px;
         }
 
-        /* Screens management */
         .screen { display: none; }
         .screen.active { display: block; animation: screenFade 0.3s ease-out; }
 
@@ -135,9 +140,9 @@
         }
 
         .app-title-container {
-            display: grid;
-            grid-template-columns: 40px 1fr 40px;
+            display: flex;
             align-items: center;
+            justify-content: center;
             margin-bottom: 20px;
             position: relative;
         }
@@ -149,72 +154,53 @@
             gap: 10px; 
             font-size: 24px; 
             font-weight: 700;
-            grid-column: 2;
         }
         .app-title i { color: var(--ios-blue); }
 
-        .menu-btn {
-            grid-column: 3;
-            background: var(--ios-input);
-            border: none;
-            color: var(--ios-blue);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
+        .tab-bar {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            max-width: 380px;
+            background: var(--ios-menu-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            height: 70px;
+            border-radius: 25px;
             display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            z-index: 1000;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+
+        .tab-item {
+            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            color: var(--ios-gray);
+            text-decoration: none;
+            flex: 1;
             cursor: pointer;
             transition: 0.2s;
+            gap: 4px;
         }
 
-        /* iOS 17/18 Styled Dropdown */
-        .dropdown-menu {
-            position: absolute;
-            top: 45px;
-            right: 0;
-            width: 200px;
-            background: var(--ios-menu-bg);
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border-radius: 14px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            z-index: 100;
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-            border: 0.5px solid rgba(255,255,255,0.2);
-            padding: 4px;
-            animation: menuFade 0.15s cubic-bezier(0.1, 0.7, 0.1, 1);
-            transform-origin: top right;
+        .tab-item.active {
+            color: var(--ios-blue);
         }
 
-        @keyframes menuFade {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
+        .tab-item i {
+            font-size: 20px;
         }
 
-        .dropdown-menu.active { display: flex; }
-
-        .menu-item {
-            padding: 10px 14px;
-            font-size: 15px;
-            color: var(--ios-text);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: background 0.1s;
-            margin-bottom: 2px;
-        }
-        .menu-item:active { background: var(--ios-hover); }
-        .menu-item i { font-size: 16px; color: var(--ios-text); opacity: 0.9; }
-
-        .menu-separator {
-            height: 0.5px;
-            background: var(--ios-separator);
-            margin: 4px 10px;
+        .tab-label {
+            font-size: 10px;
+            font-weight: 500;
         }
 
         .mode-switcher {
@@ -338,7 +324,6 @@
             display: flex; align-items: center; gap: 5px; margin-bottom: 15px;
         }
 
-        /* AI Chat Styles */
         .chat-area {
             height: 300px;
             overflow-y: auto;
@@ -396,7 +381,6 @@
             cursor: pointer;
         }
 
-        /* Settings shared styles */
         .settings-section-title {
             font-size: 13px; color: var(--ios-gray); text-transform: uppercase;
             margin: 20px 0 8px 16px; font-weight: 600;
@@ -406,19 +390,37 @@
             display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;
         }
 
-        .socials { display: flex; justify-content: center; gap: 30px; margin-top: 20px; }
-        .socials a { color: var(--ios-blue); font-size: 1.5rem; }
-
         #toast {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
             background: rgba(0,0,0,0.8); color: white; padding: 10px 20px;
             border-radius: 20px; font-size: 14px; display: none; z-index: 1000;
         }
+
+        .dev-profile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 10px;
+        }
+        .dev-avatar {
+            width: 80px;
+            height: 80px;
+            background: var(--ios-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 122, 255, 0.3);
+        }
+        .dev-name { font-size: 20px; font-weight: 700; }
+        .dev-bio { font-size: 14px; color: var(--ios-gray); margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <!-- SHARED HEADER TEMPLATE -->
     <template id="header-template">
         <div class="internal-top-bar">
             <div class="top-pill clock-pill clock-display">00:00:00</div>
@@ -437,27 +439,12 @@
         </div>
     </template>
 
-    <!-- MAIN SCREEN -->
     <div class="container screen active" id="main-screen">
         <div id="header-main"></div>
         <div class="app-title-container">
             <div class="app-title">
                 <i class="fas fa-dice-five"></i>
                 <span id="t-app-name">Randomizer</span>
-            </div>
-            <button class="menu-btn" onclick="toggleMenu(event)">
-                <i class="fas fa-ellipsis-h"></i>
-            </button>
-            <div class="dropdown-menu" id="dropdown-menu">
-                <div class="menu-item" onclick="navigateTo('ai-chat-screen')">
-                    <span id="t-ai-chat-menu">Мій AI Chat</span>
-                    <i class="fas fa-robot"></i>
-                </div>
-                <div class="menu-separator"></div>
-                <div class="menu-item" onclick="openSettings()">
-                    <span id="t-settings-menu">Налаштування</span>
-                    <i class="fas fa-cog"></i>
-                </div>
             </div>
         </div>
 
@@ -529,24 +516,14 @@
             <span id="t-history" style="font-weight: 600;">History</span>
             <div id="t-view-all" style="margin-top:4px; opacity: 0.7; font-size: 11px;">Натисніть для перегляду</div>
         </div>
-
-        <div class="socials">
-            <a href="#"><i class="fab fa-telegram"></i></a>
-            <a href="#"><i class="fab fa-instagram"></i></a>
-            <a href="#"><i class="fab fa-tiktok"></i></a>
-        </div>
     </div>
 
-    <!-- AI CHAT SCREEN -->
     <div class="ai-chat-container screen" id="ai-chat-screen">
         <div id="header-ai"></div>
-        <button class="back-btn" onclick="navigateTo('main-screen')">
-            <i class="fas fa-chevron-left"></i> <span id="t-back-ai">Назад</span>
-        </button>
-        <h2 style="margin: 0 0 15px 0; text-align: center;">Мій AI Chat</h2>
+        <h2 id="t-ai-title" style="margin: 0 0 15px 0; text-align: center;">Мій AI Chat</h2>
         
         <div class="chat-area" id="ai-messages">
-            <div class="msg-bubble msg-ai">Привіт! Я твій AI помічник. Чим можу допомогти?</div>
+            <div class="msg-bubble msg-ai" id="t-ai-greeting">Привіт! Я твій AI помічник. Чим можу допомогти?</div>
         </div>
 
         <div class="chat-input-container">
@@ -555,7 +532,6 @@
         </div>
     </div>
 
-    <!-- HISTORY SCREEN -->
     <div class="history-container screen" id="history-screen">
         <div id="header-history"></div>
         <button class="back-btn" onclick="navigateTo('main-screen')">
@@ -563,15 +539,11 @@
         </button>
         <h2 id="t-hist-title" style="margin: 0 0 15px 0; text-align: center;">Історія</h2>
         <div class="history-list" id="full-log"></div>
-        <button class="clear-btn" id="t-clear" onclick="clearHistory()" style="display:none;">Clear History</button>
+        <button class="clear-btn" id="t-clear" onclick="clearHistory()" style="display:none; width: 100%; padding: 10px; border-radius: 12px; border:none; background: var(--ios-red); color:white; font-weight:600; cursor:pointer;">Clear History</button>
     </div>
 
-    <!-- SETTINGS SCREEN -->
     <div class="settings-container screen" id="settings-screen">
         <div id="header-settings"></div>
-        <button class="back-btn" onclick="navigateTo('main-screen')">
-            <i class="fas fa-chevron-left"></i> <span id="t-back-settings">Назад</span>
-        </button>
         <h2 id="t-sett-title" style="margin: 0 0 15px 0; text-align: center;">Налаштування</h2>
         
         <div class="settings-section-title" id="t-gen-settings">Генерація</div>
@@ -598,11 +570,49 @@
         </div>
     </div>
 
+    <div class="dev-container screen" id="dev-screen">
+        <div id="header-dev"></div>
+        <h2 id="t-dev-title" style="margin: 0 0 20px 0; text-align: center;">Розробник</h2>
+        <div class="dev-profile">
+            <div class="dev-avatar"><i class="fas fa-code"></i></div>
+            <div class="dev-name">Randomizer Pro Team</div>
+            <div class="dev-bio" id="t-dev-bio">Ми створюємо найкращі інструменти для рандомізації у світі.</div>
+            
+            <div class="settings-section-title" id="t-contacts" style="align-self: flex-start; margin-left:0;">Контакти</div>
+            <div class="settings-row" style="width: 100%; box-sizing: border-box;">
+                <span id="t-support">Підтримка</span>
+                <i class="fas fa-envelope" style="color: var(--ios-blue);"></i>
+            </div>
+            <div class="settings-row" style="width: 100%; box-sizing: border-box;">
+                <span id="t-website">Веб-сайт</span>
+                <i class="fas fa-globe" style="color: var(--ios-blue);"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <div class="tab-item active" onclick="navigateTo('main-screen')" id="tab-main">
+            <i class="fas fa-house"></i>
+            <span class="tab-label" id="t-tab-main">Головна</span>
+        </div>
+        <div class="tab-item" onclick="navigateTo('ai-chat-screen')" id="tab-ai">
+            <i class="fas fa-robot"></i>
+            <span class="tab-label" id="t-tab-ai">Ші помічник</span>
+        </div>
+        <div class="tab-item" onclick="navigateTo('settings-screen')" id="tab-settings">
+            <i class="fas fa-gear"></i>
+            <span class="tab-label" id="t-tab-settings">Налаштування</span>
+        </div>
+        <div class="tab-item" onclick="navigateTo('dev-screen')" id="tab-dev">
+            <i class="fas fa-user-tie"></i>
+            <span class="tab-label" id="t-tab-dev">Розробник</span>
+        </div>
+    </div>
+
     <div id="toast">Повідомлення</div>
 
 <script>
-    // --- API CONFIG ---
-    const apiKey = "AIzaSyAsJw3k7VCxrevkKEFCZxlfyIqZOiNGsqQ"; // <--- ВСТАВТЕ ВАШ API KEY ТУТ
+    const apiKey = ""; 
 
     let currentMode = 'numbers';
     let currentLang = 'uk';
@@ -610,7 +620,51 @@
     let coinRotation = 0;
     let historyData = [];
 
-    // --- AI CHAT LOGIC ---
+    const translations = {
+        uk: {
+            appName: "Randomizer",
+            mainTab: "Головна", aiTab: "Ші помічник", settTab: "Налаштування", devTab: "Розробник",
+            min: "Мін", max: "Макс", count: "Кількість", noRepeat: "Без повторів",
+            names: "Список імен", winCount: "К-сть переможців", coinHint: "Натисніть кнопку, щоб підкинути монету",
+            btnGen: "Згенерувати", history: "Історія", viewAll: "Натисніть для перегляду",
+            aiTitle: "Мій AI Chat", aiGreet: "Привіт! Я твій AI помічник. Чим можу допомогти?",
+            aiPlaceholder: "Запитайте щось...", back: "Назад", histTitle: "Історія",
+            settTitle: "Налаштування", genSett: "Генерація", delay: "Затримка (сек)",
+            dataSett: "Дані та Експорт", exportTxt: "Експорт у .TXT", aboutSett: "Про додаток", version: "Версія",
+            devTitle: "Розробник", devBio: "Ми створюємо найкращі інструменти для рандомізації у світі.",
+            contacts: "Контакти", support: "Підтримка", website: "Веб-сайт",
+            copied: "Скопійовано", cleared: "Очищено", coinHeads: "Орел", coinTails: "Решка"
+        },
+        en: {
+            appName: "Randomizer",
+            mainTab: "Home", aiTab: "AI Assistant", settTab: "Settings", devTab: "Developer",
+            min: "Min", max: "Max", count: "Count", noRepeat: "No repeats",
+            names: "Name List", winCount: "Winners Count", coinHint: "Tap button to flip a coin",
+            btnGen: "Generate", history: "History", viewAll: "Tap to view",
+            aiTitle: "My AI Chat", aiGreet: "Hello! I am your AI assistant. How can I help?",
+            aiPlaceholder: "Ask something...", back: "Back", histTitle: "History",
+            settTitle: "Settings", genSett: "Generation", delay: "Delay (sec)",
+            dataSett: "Data & Export", exportTxt: "Export to .TXT", aboutSett: "About app", version: "Version",
+            devTitle: "Developer", devBio: "We build the world's best randomization tools.",
+            contacts: "Contacts", support: "Support", website: "Website",
+            copied: "Copied", cleared: "Cleared", coinHeads: "Heads", coinTails: "Tails"
+        },
+        ru: {
+            appName: "Randomizer",
+            mainTab: "Главная", aiTab: "ИИ Помощник", settTab: "Настройки", devTab: "Разработчик",
+            min: "Мин", max: "Макс", count: "Кол-во", noRepeat: "Без повторов",
+            names: "Список имен", winCount: "Кол-во победителей", coinHint: "Нажмите кнопку, чтобы бросить монету",
+            btnGen: "Сгенерировать", history: "История", viewAll: "Нажмите для просмотра",
+            aiTitle: "Мой ИИ Чат", aiGreet: "Привет! Я твой ИИ помощник. Чем могу помочь?",
+            aiPlaceholder: "Спросите что-то...", back: "Назад", histTitle: "История",
+            settTitle: "Настройки", genSett: "Генерация", delay: "Задержка (сек)",
+            dataSett: "Данные и Экспорт", exportTxt: "Экспорт в .TXT", aboutSett: "О приложении", version: "Версия",
+            devTitle: "Разработчик", devBio: "Мы создаем лучшие инструменты для рандомизации в мире.",
+            contacts: "Контакты", support: "Поддержка", website: "Веб-сайт",
+            copied: "Скопировано", cleared: "Очищено", coinHeads: "Орел", coinTails: "Решка"
+        }
+    };
+
     function handleAiKey(e) { if(e.key === 'Enter') sendAiMessage(); }
 
     async function sendAiMessage() {
@@ -622,7 +676,7 @@
         input.value = '';
 
         if(!apiKey) {
-            addBubble("Помилка: API ключ не встановлено. Додайте його в код (apiKey).", "ai");
+            addBubble("Помилка: API ключ не встановлено.", "ai");
             return;
         }
 
@@ -632,7 +686,7 @@
             const response = await callGemini(text);
             thinkingBubble.innerText = response;
         } catch (err) {
-            thinkingBubble.innerText = "Вибачте, виникла помилка. Перевірте ключ або спробуйте пізніше.";
+            thinkingBubble.innerText = "Error.";
         }
     }
 
@@ -650,37 +704,26 @@
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
         const body = {
             contents: [{ parts: [{ text: prompt }] }],
-            systemInstruction: { parts: [{ text: "Ти AI помічник у додатку Randomizer Pro. Відповідай ввічливо та коротко українською мовою." }] }
+            systemInstruction: { parts: [{ text: "Ти AI помічник у додатку Randomizer Pro. Відповідай ввічливо та коротко." }] }
         };
-
-        const fetchRetry = async (retries = 5, delay = 1000) => {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(body)
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        return data.candidates?.[0]?.content?.parts?.[0]?.text || "Порожня відповідь.";
-                    }
-                } catch (e) {}
-                await new Promise(r => setTimeout(r, delay));
-                delay *= 2;
-            }
-            throw new Error("Failed");
-        };
-        return await fetchRetry();
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        const data = await response.json();
+        return data.candidates?.[0]?.content?.parts?.[0]?.text || "Empty response.";
     }
 
-    // --- Core UI Management ---
     function initHeaders() {
         const template = document.getElementById('header-template');
-        const targets = ['header-main', 'header-history', 'header-settings', 'header-ai'];
+        const targets = ['header-main', 'header-history', 'header-settings', 'header-ai', 'header-dev'];
         targets.forEach(targetId => {
             const container = document.getElementById(targetId);
-            if(container) container.appendChild(template.content.cloneNode(true));
+            if(container) {
+                container.innerHTML = '';
+                container.appendChild(template.content.cloneNode(true));
+            }
         });
         updateHeaderStates();
     }
@@ -699,18 +742,15 @@
 
     function navigateTo(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(screenId).classList.add('active');
-        document.getElementById('dropdown-menu').classList.remove('active');
+        const target = document.getElementById(screenId);
+        if(target) target.classList.add('active');
+
+        document.querySelectorAll('.tab-item').forEach(ti => ti.classList.remove('active'));
+        if(screenId === 'main-screen') document.getElementById('tab-main').classList.add('active');
+        if(screenId === 'ai-chat-screen') document.getElementById('tab-ai').classList.add('active');
+        if(screenId === 'settings-screen') document.getElementById('tab-settings').classList.add('active');
+        if(screenId === 'dev-screen') document.getElementById('tab-dev').classList.add('active');
     }
-
-    function toggleMenu(event) {
-        event.stopPropagation();
-        document.getElementById('dropdown-menu').classList.toggle('active');
-    }
-
-    window.onclick = () => document.getElementById('dropdown-menu').classList.remove('active');
-
-    function openSettings() { navigateTo('settings-screen'); }
 
     function toggleTheme() {
         const body = document.body;
@@ -758,7 +798,7 @@
             const isHeads = Math.random() < 0.5;
             coinRotation += (Math.floor(Math.random() * 5) + 5) * 360 + (isHeads ? 0 : 180);
             coinObj.style.transform = `rotateY(${coinRotation}deg)`;
-            const resText = isHeads ? (currentLang === 'uk' ? "Орел" : "Heads") : (currentLang === 'uk' ? "Решка" : "Tails");
+            const resText = isHeads ? translations[currentLang].coinHeads : translations[currentLang].coinTails;
             setTimeout(() => {
                 document.getElementById('t-coin-hint').innerText = resText;
                 addToLog(resText);
@@ -822,7 +862,7 @@
         document.getElementById('full-log').innerHTML = '';
         document.getElementById('t-clear').style.display = 'none';
         historyData = [];
-        showToast("Clear");
+        showToast(translations[currentLang].cleared);
     }
 
     function exportHistoryTxt() {
@@ -838,18 +878,54 @@
     function copyResult() {
         let text = (currentMode === 'coin') ? document.getElementById('t-coin-hint').innerText : document.getElementById('output').innerText;
         navigator.clipboard.writeText(text);
-        showToast("Copied");
+        showToast(translations[currentLang].copied);
     }
 
     function shareResult() { showToast("Sharing..."); }
 
     function setLang(lang) {
         currentLang = lang;
-        // Basic labels toggle
-        document.getElementById('t-history').innerText = lang === 'uk' ? 'Історія' : 'History';
-        document.getElementById('t-back').innerText = lang === 'uk' ? 'Назад' : 'Back';
-        document.getElementById('t-back-settings').innerText = lang === 'uk' ? 'Назад' : 'Back';
-        document.getElementById('t-back-ai').innerText = lang === 'uk' ? 'Назад' : 'Back';
+        const dict = translations[lang];
+
+        document.getElementById('t-app-name').innerText = dict.appName;
+        
+        document.getElementById('t-tab-main').innerText = dict.mainTab;
+        document.getElementById('t-tab-ai').innerText = dict.aiTab;
+        document.getElementById('t-tab-settings').innerText = dict.settTab;
+        document.getElementById('t-tab-dev').innerText = dict.devTab;
+
+        document.getElementById('t-min').innerText = dict.min;
+        document.getElementById('t-max').innerText = dict.max;
+        document.getElementById('t-count').innerText = dict.count;
+        document.getElementById('t-no-repeat').innerText = dict.noRepeat;
+        document.getElementById('t-names').innerText = dict.names;
+        document.getElementById('t-name-count').innerText = dict.winCount;
+        document.getElementById('t-coin-hint').innerText = dict.coinHint;
+        document.getElementById('t-btn').innerText = dict.btnGen;
+        document.getElementById('t-history').innerText = dict.history;
+        document.getElementById('t-view-all').innerText = dict.viewAll;
+
+        document.getElementById('t-ai-title').innerText = dict.aiTitle;
+        if(document.getElementById('t-ai-greeting')) document.getElementById('t-ai-greeting').innerText = dict.aiGreet;
+        document.getElementById('ai-user-input').placeholder = dict.aiPlaceholder;
+
+        document.getElementById('t-back').innerText = dict.back;
+        document.getElementById('t-hist-title').innerText = dict.histTitle;
+
+        document.getElementById('t-sett-title').innerText = dict.settTitle;
+        document.getElementById('t-gen-settings').innerText = dict.genSett;
+        document.getElementById('t-delay').innerText = dict.delay;
+        document.getElementById('t-data-settings').innerText = dict.dataSett;
+        document.getElementById('t-export-txt').innerText = dict.exportTxt;
+        document.getElementById('t-about-settings').innerText = dict.aboutSett;
+        document.getElementById('t-version').innerText = dict.version;
+
+        document.getElementById('t-dev-title').innerText = dict.devTitle;
+        document.getElementById('t-dev-bio').innerText = dict.devBio;
+        document.getElementById('t-contacts').innerText = dict.contacts;
+        document.getElementById('t-support').innerText = dict.support;
+        document.getElementById('t-website').innerText = dict.website;
+
         updateHeaderStates();
     }
 
